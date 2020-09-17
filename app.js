@@ -12,13 +12,13 @@ const userRoutes = require('./api/routes/user');
 
 mongoose
     .connect(
-        `mongodb+srv://${process.env.MONGO_DB_NAME}:${process.env.MONGO_DB_PWD}@restapi-node.wr2la.mongodb.net/restapi-node?retryWrites=true&w=majority`,
+        `mongodb+srv://dbTest:test123@restapi-node.wr2la.mongodb.net/restapi-node?retryWrites=true&w=majority`,
     {
     useNewUrlParser: true,
     useUnifiedTopology: true
     })
     .then(result => {
-        const server = app.listen(8080);
+        const server = app.listen(443);
         const io = require('./socket').init(server);
         io.on('connection', socket => {
             console.log('Client connected');
