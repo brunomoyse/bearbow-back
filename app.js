@@ -18,11 +18,11 @@ mongoose
     useUnifiedTopology: true
     })
     .then(result => {
-        const server = app.listen(process.env.PORT || 3000);
-        const io = require('./socket').init(server);
-        io.on('connection', socket => {
-            console.log('Client connected');
-        })
+        // const server = app.listen(process.env.PORT || 3030);
+        // const io = require('./socket').init(server);
+        // io.on('connection', socket => {
+        //     console.log('Client connected');
+        // })
     })
 
 // Pour les erreurs de dépréciations
