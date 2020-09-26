@@ -30,39 +30,27 @@ exports.products_get_all = (req, res, next) => {
 }
 
 exports.products_create_product = (req, res, next) => {
-    switch (req.files) {
-        case undefined:
-            var product = new Product({
-                _id: new mongoose.Types.ObjectId(),
-                categorie:      req.body.categorie,
-                description:    req.body.description,
-                disponibilite:  req.body.disponibilite,
-                marque:         req.body.marque,
-                nom:            req.body.nom,
-                prix:           req.body.prix,
-                type:           req.body.type
-            })
-            break;
-        default:
-            const length = req.files.length
-            const paths = []
-            for (let index = 0; index < length; index++) {
-                paths.push(req.files[index]['path'])            
-            }
-            
-            var product = new Product({
-                _id: new mongoose.Types.ObjectId(),
-                categorie:      req.body.categorie,
-                description:    req.body.description,
-                disponibilite:  req.body.disponibilite,
-                image:          paths,
-                marque:         req.body.marque,
-                nom:            req.body.nom,
-                prix:           req.body.prix,
-                type:           req.body.type
-            })
-            break;
-    }
+
+    var newProduct = {
+        _id: new mongoose.Types.ObjectId(),
+        categorie:      req.body.categorie,
+        description:    req.body.description,
+        disponibilite:  req.body.disponibilite,
+        marque:         req.body.marque,
+        nom:            req.body.nom,
+        prix:           req.body.prix,
+        type:           req.body.type
+    };
+
+    if(req.files) {
+        const paths = [];
+        req.files.forEach(e => {
+            paths.push(e.path)
+        });
+        var newProduct = { ...newProduct, image: paths };
+    };
+
+    let product = new Product(newProduct);
         
     product
         .save()
@@ -86,13 +74,12 @@ exports.products_create_product = (req, res, next) => {
                 error: err
             });
         });
-
 }
 
 exports.products_get_product = (req, res, next) => {
     const id = req.params.productId;
     Product.findById(id)
-        .select('name price _id productImage')
+        .select('_id categorie description image marque nom prix type')
         .exec()
         .then(doc => {
             console.log("From database" + doc);
@@ -108,7 +95,6 @@ exports.products_get_product = (req, res, next) => {
             } else {
                 res.status(404).json({message: 'No valid entry found for provided ID'});
             }
-
         })
         .catch(err => {
             console.log(err);
@@ -121,7 +107,6 @@ exports.products_update_product = (req, res, next) => {
     Product.update({ _id: id }, { $set: req.body })
         .exec()
         .then(() => {
-
             const product = req.body
             io.getIO().emit('products', { action: 'update', product: product })
             res.status(200).json({

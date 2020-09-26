@@ -10,7 +10,12 @@ const storage = multer.diskStorage({
     },
     filename: function(req, file, cb) {
         // problème de nom de fichier car ":" dans la fonction iso-string + supprime les espaces du nom de l'img
-        cb(null, new Date().toISOString().replace(/:|\./g,'') + '-' + file.originalname.replace(/\s/g,'-'));
+        // new Date().toISOString().replace(/:|\./g,'') + '-' + file.originalname.replace(/\s/g,'-')
+
+        let date = new Date();
+        let newFileName = Date.now() + "-" + file.originalname.replace(/\s/g,'-');
+
+        cb(null, newFileName);
     }
 });
 

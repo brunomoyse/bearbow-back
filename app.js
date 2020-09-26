@@ -17,12 +17,12 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true
     })
-    .then(result => {
-        // const server = app.listen(process.env.PORT || 3030);
-        // const io = require('./socket').init(server);
-        // io.on('connection', socket => {
-        //     console.log('Client connected');
-        // }) 
+    .then(() => {
+        const server = app.listen(process.env.PORT || 3030);
+        const io = require('./socket').init(server);
+        io.on('connection', socket => {
+            console.log('Client connected');
+        }) 
     })
 
 // Pour les erreurs de dépréciations
@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 // Routes which should handle requests
 app.use('/products', productRoutes);
 app.use('/orders', orderRoutes);
-app.use('/user', userRoutes);
+app.use('/users', userRoutes);
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
