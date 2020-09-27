@@ -4,7 +4,7 @@ const Product = require('../models/product');
 
 exports.products_get_all = (req, res, next) => {
     Product.find()
-        .select('_id categorie description image marque nom prix type')
+        .select('_id categorie description disponibilite image marque nom prix type')
         .exec()
         .then(docs => {
             const response = {
@@ -13,6 +13,7 @@ exports.products_get_all = (req, res, next) => {
                         _id: doc._id,
                         categorie: doc.categorie,
                         description: doc.description,
+                        disponibilite: doc.disponibilite,
                         image: doc.image,
                         marque: doc.marque,
                         nom: doc.nom,
@@ -30,7 +31,6 @@ exports.products_get_all = (req, res, next) => {
 }
 
 exports.products_create_product = (req, res, next) => {
-
     var newProduct = {
         _id: new mongoose.Types.ObjectId(),
         categorie:      req.body.categorie,
@@ -54,18 +54,10 @@ exports.products_create_product = (req, res, next) => {
         
     product
         .save()
-        .then(result => {
+        .then(() => {
             io.getIO().emit('products', { action: 'create', product: product })
             res.status(201).json({
-                _id: result._id,
-                categorie:      result.categorie,
-                description:    result.description,
-                disponibilite:  result.disponibilite,
-                image:          result.image,
-                marque:         result.marque,
-                nom:            result.nom,
-                prix:           result.prix,
-                type:           result.type
+                message: 'Produit créé correctement.'
             });
         })
         .catch(err => {
@@ -104,21 +96,32 @@ exports.products_get_product = (req, res, next) => {
 
 exports.products_update_product = (req, res, next) => {
     const id = req.params.productId;
-    Product.update({ _id: id }, { $set: req.body })
-        .exec()
-        .then(() => {
-            const product = req.body
-            io.getIO().emit('products', { action: 'update', product: product })
-            res.status(200).json({
-                message: 'Produit mis à jour correctement.'
-            });
-        })
+
+if(req.files) {
+    var paths = [];
+    req.files.forEach(e => {
+        paths.push(e.path)
+    });
+    var updatedProduct = {...req.body, ...{ image: paths }}
+} else {
+    var updatedProduct = req.body; // à changer car écrase les images existantes
+};
+
+Product.updateOne({ _id: id }, { $set: updatedProduct })
+    .exec()
+    .then(() => {
+        io.getIO().emit('products', { action: 'update', product: updatedProduct })
+        res.status(200).json({
+            message: 'Produit mis à jour correctement.'
+        });
+    })
     .catch(err => {
         console.log(err);
         res.status(500).json({
             error: err
         });
     });
+
 };
 
 exports.products_delete_product = (req, res, next) => {
