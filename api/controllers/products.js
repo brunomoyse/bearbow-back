@@ -71,18 +71,12 @@ exports.products_create_product = (req, res, next) => {
 exports.products_get_product = (req, res, next) => {
     const id = req.params.productId;
     Product.findById(id)
-        .select('_id categorie description image marque nom prix type')
+        .select('_id categorie description disponibilite image marque nom prix type')
         .exec()
         .then(doc => {
-            console.log("From database" + doc);
             if (doc) {
                 res.status(200).json({
-                    product: doc,
-                    request: {
-                        type: 'GET',
-                        description: 'All products',
-                        url: 'http://localhost:3000/products/'
-                    }
+                    product: doc
                 });
             } else {
                 res.status(404).json({message: 'No valid entry found for provided ID'});
@@ -95,32 +89,51 @@ exports.products_get_product = (req, res, next) => {
 }
 
 exports.products_update_product = (req, res, next) => {
+
     const id = req.params.productId;
 
-if(req.files) {
-    var paths = [];
-    req.files.forEach(e => {
-        paths.push(e.path)
-    });
-    var updatedProduct = {...req.body, ...{ image: paths }}
-} else {
-    var updatedProduct = req.body; // à changer car écrase les images existantes
-};
+    const changeBool = (val) => {
+        if (val === 'true' || val === true) {
+            return true
+        } else {
+            return false
+        }
+    };
 
-Product.updateOne({ _id: id }, { $set: updatedProduct })
-    .exec()
-    .then(() => {
-        io.getIO().emit('products', { action: 'update', product: updatedProduct })
-        res.status(200).json({
-            message: 'Produit mis à jour correctement.'
+    let product = {...req.body, 
+        ...{
+            prix: Number(req.body.prix),
+            disponibilite: changeBool(req.body.disponibilite)
+        }
+    }
+
+    if(req.files) {
+        var paths = [];
+        req.files.forEach(e => {
+            paths.push(e.path)
         });
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
+        
+        var updatedProduct = {...product, ...{ image: paths }}
+
+    } else {
+        var updatedProduct = { ...product, ...{ image: req.body.image } };
+    };
+
+
+    Product.updateOne({ _id: id }, { $set: updatedProduct })
+        .exec()
+        .then(() => {
+            io.getIO().emit('products', { action: 'update', product: updatedProduct })
+            res.status(200).json({
+                message: 'Produit mis à jour correctement.'
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
         });
-    });
 
 };
 

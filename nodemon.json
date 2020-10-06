@@ -1,0 +1,9 @@
+{
+    "env": {
+        "MONGO_DB_NAME": "dbTest",
+        "MONGO_DB_PWD": "test123",
+        "MONGO_ATLAS_ID": "moyse94@gmail.com",
+        "MONGO_ATLAS_PW": "Ss130942$",
+        "JWT_KEY": "13cc1774a57c9b50814a7145184d1dc9e2b8a1d0d57cec6705157370919c4d5a"
+    }
+}
