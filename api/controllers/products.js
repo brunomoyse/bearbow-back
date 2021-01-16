@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const io = require('../../socket');
 const Product = require('../models/product');
 
-exports.products_get_all = (req, res, next) => {
+exports.products_get_all = (req, res) => {
     Product.find()
         .select('_id categorie description disponibilite image marque nom prix type')
         .exec()
@@ -30,7 +30,7 @@ exports.products_get_all = (req, res, next) => {
         });
 }
 
-exports.products_create_product = (req, res, next) => {
+exports.products_create_product = (req, res) => {
     var newProduct = {
         _id: new mongoose.Types.ObjectId(),
         categorie:      req.body.categorie,
@@ -42,16 +42,17 @@ exports.products_create_product = (req, res, next) => {
         type:           req.body.type
     };
 
+
     if(req.files) {
         const paths = [];
         req.files.forEach(e => {
             paths.push(e.path)
         });
         var newProduct = { ...newProduct, image: paths };
-    };
+    }
 
     let product = new Product(newProduct);
-        
+
     product
         .save()
         .then(() => {
@@ -68,7 +69,7 @@ exports.products_create_product = (req, res, next) => {
         });
 }
 
-exports.products_get_product = (req, res, next) => {
+exports.products_get_product = (req, res) => {
     const id = req.params.productId;
     Product.findById(id)
         .select('_id categorie description disponibilite image marque nom prix type')
@@ -88,7 +89,7 @@ exports.products_get_product = (req, res, next) => {
         });
 }
 
-exports.products_update_product = (req, res, next) => {
+exports.products_update_product = (req, res) => {
 
     const id = req.params.productId;
 
@@ -100,7 +101,7 @@ exports.products_update_product = (req, res, next) => {
         }
     };
 
-    let product = {...req.body, 
+    let product = {...req.body,
         ...{
             prix: Number(req.body.prix),
             disponibilite: changeBool(req.body.disponibilite)
@@ -112,12 +113,12 @@ exports.products_update_product = (req, res, next) => {
         req.files.forEach(e => {
             paths.push(e.path)
         });
-        
+
         var updatedProduct = {...product, ...{ image: paths }}
 
     } else {
         var updatedProduct = { ...product, ...{ image: req.body.image } };
-    };
+    }
 
 
     Product.updateOne({ _id: id }, { $set: updatedProduct })
@@ -137,7 +138,7 @@ exports.products_update_product = (req, res, next) => {
 
 };
 
-exports.products_delete_product = (req, res, next) => {
+exports.products_delete_product = (req, res) => {
 
     const id = req.params.productId // 'productId' vient du fichier route.js
 
@@ -160,10 +161,10 @@ exports.products_delete_product = (req, res, next) => {
                             } else {
                                 console.log('Image n°' + (index+1) + '/' + length + ' du produit supprimée')
                             }
-                        })                
+                        })
                     }
                     break;
-            }           
+            }
         })
         .catch(err => {
             console.log(err);

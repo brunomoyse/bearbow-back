@@ -22,7 +22,7 @@ mongoose
         const io = require('./socket').init(server);
         io.on('connection', socket => {
             console.log('Client connected');
-        }) 
+        })
     })
 
 // Pour les erreurs de dépréciations
@@ -36,7 +36,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(helmet());
 app.use(compression());
-
+//
 // Prevent CORS errors dans le navigateur, pour que la navigateur puisse accéder à l'API
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -82,6 +82,6 @@ app.use(function(req, res, next) {
       return res.redirect("https://" + req.headers.host + req.url);
     }
   });
- 
+
 
 module.exports = app;
